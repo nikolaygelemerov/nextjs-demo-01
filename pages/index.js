@@ -1,14 +1,16 @@
 import fs from "fs/promises";
 import path from "path";
 
-const HomePage = (props) => {
-  console.log("props: ", props);
+import Link from "next/link";
 
+const HomePage = ({ products }) => {
   return (
     <ul>
-      <li>Product 1</li>
-      <li>Product 2</li>
-      <li>Product 3</li>
+      {products.map((product) => (
+        <li key={product.id}>
+          <Link href={`/products/${product.id}`}>{product.title}</Link>
+        </li>
+      ))}
     </ul>
   );
 };
@@ -18,9 +20,15 @@ export const getStaticProps = async () => {
   const jsonData = await fs.readFile(filePath);
   const data = JSON.parse(jsonData);
 
-  console.log("data: ", data);
+  if (!data) {
+    return {
+      redirect: {
+        destination: "/no-data",
+      },
+    };
+  }
 
-  return { props: { products: data.products } };
+  return { props: { products: data.products }, revalidate: 10 };
 };
 
 export default HomePage;
